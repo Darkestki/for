@@ -1,5 +1,5 @@
 # ==========================================
-# 🚜 Tractor Forecast Pro – No Scroll Version
+# 🚜 Tractor Forecast Pro – Unified Design
 # ==========================================
 
 import streamlit as st
@@ -9,7 +9,7 @@ import os
 import numpy as np
 
 # ------------------------------------------
-# 🎨 Page Config
+# 🎨 Page Configuration
 # ------------------------------------------
 st.set_page_config(
     page_title="Tractor Forecast Pro",
@@ -18,64 +18,74 @@ st.set_page_config(
 )
 
 # ------------------------------------------
-# 💎 Ultra Compact Styling
+# 💎 Unified Styling (Everything Same Look)
 # ------------------------------------------
 st.markdown("""
 <style>
 
+/* Global */
 html, body, [class*="css"]  {
+    font-family: 'Segoe UI', sans-serif;
     font-size: 14px;
 }
 
 .stApp {
-    background: #f9fbff;
+    background: #f4f7fc;
 }
 
-.main-title {
-    text-align:center;
-    font-size:28px;
-    font-weight:700;
-    color:#1f3c88;
-    margin-bottom:5px;
-}
-
-.sub-title {
-    text-align:center;
-    font-size:14px;
-    color:#666;
-    margin-bottom:15px;
-}
-
-/* Compact cards */
-.card {
-    background:white;
-    padding:12px;
-    border-radius:10px;
-    box-shadow:0 3px 8px rgba(0,0,0,0.05);
-    text-align:center;
-}
-
-.metric-good {
-    border-left:4px solid #2ca02c;
-}
-
-.metric-bad {
-    border-left:4px solid #d62728;
-}
-
-/* Remove extra padding */
+/* Remove extra spacing */
 .block-container {
     padding-top: 1rem;
     padding-bottom: 0rem;
 }
 
-/* Smaller button */
-.stButton>button {
-    padding:6px 14px;
+/* Title */
+.title {
+    text-align:center;
+    font-size:26px;
+    font-weight:600;
+    color:#1f3c88;
+    margin-bottom:4px;
+}
+
+.subtitle {
+    text-align:center;
     font-size:13px;
-    border-radius:6px;
+    color:#666;
+    margin-bottom:15px;
+}
+
+/* Universal Card */
+.card {
+    background:white;
+    padding:16px;
+    border-radius:12px;
+    box-shadow:0 3px 10px rgba(0,0,0,0.06);
+    text-align:center;
+}
+
+/* Highlight */
+.good {
+    border:2px solid #2ca02c;
+}
+
+.bad {
+    border:2px solid #d62728;
+}
+
+/* Buttons */
+.stButton>button {
+    width:100%;
     background:#1f77b4;
     color:white;
+    border-radius:8px;
+    padding:8px;
+    font-weight:500;
+}
+
+/* Selectboxes & Inputs */
+.stSelectbox, .stNumberInput {
+    font-size:13px;
 }
 
 </style>
@@ -131,17 +141,16 @@ exp_model, arima_model = load_models()
 # ------------------------------------------
 # 🏷️ Header
 # ------------------------------------------
-st.markdown('<div class="main-title">🚜 Tractor Forecast Pro</div>', unsafe_allow_html=True)
-st.markdown('<div class="sub-title">Exponential Smoothing vs SARIMAX</div>', unsafe_allow_html=True)
+st.markdown('<div class="title">🚜 Tractor Forecast Pro</div>', unsafe_allow_html=True)
+st.markdown('<div class="subtitle">Exponential Smoothing vs SARIMAX</div>', unsafe_allow_html=True)
 
 # ==========================================
-# 📊 TOP SECTION (Everything in One Row)
+# 📊 Model Performance (Top Row)
 # ==========================================
 
-col1, col2, col3 = st.columns([1,1,1])
+col1, col2, col3 = st.columns(3)
 
 y_true = df["Number of Tractor Sold"]
-
 exp_pred = exp_model.fittedvalues
 arima_pred = arima_model.fittedvalues
 
@@ -160,10 +169,8 @@ arima_mae = mae(y, arima_pred)
 exp_mape = mape(y, exp_pred)
 arima_mape = mape(y, arima_pred)
 
-metric_choice = col1.selectbox(
-    "Metric",
-    ["RMSE", "MAE", "MAPE"]
-)
+metric_choice = col1.selectbox("Metric",
+                               ["RMSE", "MAE", "MAPE"])
 
 if metric_choice == "RMSE":
     better_model = "Exponential" if exp_rmse < arima_rmse else "SARIMAX"
@@ -174,8 +181,8 @@ else:
 
 with col2:
     st.markdown(f"""
-    <div class="card {'metric-good' if better_model=='Exponential' else 'metric-bad'}">
-    <b>Exponential</b><br>
+    <div class="card {'good' if better_model=='Exponential' else 'bad'}">
+    <b>Exponential</b><br><br>
     RMSE: {round(exp_rmse,1)}<br>
     MAE: {round(exp_mae,1)}<br>
     MAPE: {round(exp_mape,1)}%
@@ -184,21 +191,25 @@ with col2:
 
 with col3:
     st.markdown(f"""
-    <div class="card {'metric-good' if better_model=='SARIMAX' else 'metric-bad'}">
-    <b>SARIMAX</b><br>
+    <div class="card {'good' if better_model=='SARIMAX' else 'bad'}">
+    <b>SARIMAX</b><br><br>
     RMSE: {round(arima_rmse,1)}<br>
     MAE: {round(arima_mae,1)}<br>
     MAPE: {round(arima_mape,1)}%
     </div>
     """, unsafe_allow_html=True)
 
-st.success(f"🏆 Best Model ({metric_choice}): {better_model}")
+st.markdown(f"""
+<div class="card good" style="margin-top:10px;">
+🏆 Best Model ({metric_choice}) : <b>{better_model}</b>
+</div>
+""", unsafe_allow_html=True)
 
 # ==========================================
-# 🔮 FORECAST SECTION (Same Screen)
+# 🔮 Forecast Section (Same Style Cards)
 # ==========================================
 
-colA, colB, colC = st.columns([1,1,1])
+colA, colB, colC = st.columns(3)
 
 selected_month = colA.selectbox("Month",
     ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"]
@@ -206,21 +217,38 @@ selected_month = colA.selectbox("Month",
 
 selected_year = colB.number_input("Year", 2014, 2030, 2024)
 
-if colC.button("Forecast"):
+if colC.button("Generate Forecast"):
 
-    selected_date = pd.to_datetime(f"01-{selected_month}-{selected_year}", format="%d-%b-%Y")
+    selected_date = pd.to_datetime(
+        f"01-{selected_month}-{selected_year}",
+        format="%d-%b-%Y"
+    )
+
     last_date = df.index[-1]
 
     months_diff = (selected_date.year - last_date.year) * 12 + \
                   (selected_date.month - last_date.month)
 
     if months_diff > 0:
+
         exp_forecast = exp_model.forecast(months_diff).iloc[-1]
         arima_forecast = arima_model.forecast(steps=months_diff).iloc[-1]
 
         colX, colY = st.columns(2)
 
-        colX.metric("Exponential Forecast", round(exp_forecast))
-        colY.metric("SARIMAX Forecast", round(arima_forecast))
+        colX.markdown(f"""
+        <div class="card">
+        📈 Exponential Forecast<br><br>
+        <b>{round(exp_forecast)}</b>
+        </div>
+        """, unsafe_allow_html=True)
+
+        colY.markdown(f"""
+        <div class="card">
+        📊 SARIMAX Forecast<br><br>
+        <b>{round(arima_forecast)}</b>
+        </div>
+        """, unsafe_allow_html=True)
+
     else:
         st.warning("Select a future date.")
