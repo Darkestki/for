@@ -17,20 +17,28 @@ st.set_page_config(
 )
 
 # ------------------------------------------
-# 💎 Light Glass UI Styling
+# 💎 Dynamic Animated Light UI Styling
 # ------------------------------------------
 st.markdown("""
 <style>
 .stApp {
-    background: linear-gradient(-45deg, #f9fbfd, #e3f2fd, #f1f8ff, #ffffff);
-    background-size: 400% 400%;
-    animation: gradient 12s ease infinite;
+    background: linear-gradient(-45deg, 
+        #f9fbfd, 
+        #e3f2fd, 
+        #e8f5e9, 
+        #fff3e0,
+        #fce4ec,
+        #e1f5fe);
+    background-size: 500% 500%;
+    animation: gradientMove 15s ease infinite;
     color: #1a1a1a;
 }
 
-@keyframes gradient {
+@keyframes gradientMove {
     0% {background-position: 0% 50%;}
+    25% {background-position: 50% 100%;}
     50% {background-position: 100% 50%;}
+    75% {background-position: 50% 0%;}
     100% {background-position: 0% 50%;}
 }
 
@@ -38,32 +46,54 @@ h1, h2, h3, h4, h5, h6, p, label {
     color: #1a1a1a !important;
 }
 
+/* Dynamic Glass Card */
 .glass-card {
-    background: rgba(255, 255, 255, 0.85);
-    backdrop-filter: blur(10px);
-    border-radius: 20px;
+    background: linear-gradient(135deg, rgba(255,255,255,0.9), rgba(240,248,255,0.7));
+    backdrop-filter: blur(12px);
+    border-radius: 25px;
     padding: 30px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+    box-shadow: 0 12px 35px rgba(0,0,0,0.08);
     text-align: center;
     margin-top: 20px;
     border: 1px solid rgba(0,0,0,0.05);
+    animation: cardGlow 4s ease-in-out infinite alternate;
 }
 
+@keyframes cardGlow {
+    from { box-shadow: 0 0 20px rgba(76,175,80,0.2); }
+    to { box-shadow: 0 0 35px rgba(33,150,243,0.3); }
+}
+
+/* 🔮 Dynamic Forecast Button */
 .stButton>button {
-    background: linear-gradient(90deg, #4CAF50, #2E7D32);
+    background: linear-gradient(270deg, 
+        #4CAF50, 
+        #2196F3, 
+        #FF9800, 
+        #9C27B0);
+    background-size: 600% 600%;
+    animation: buttonFlow 6s ease infinite;
     color: white;
-    border-radius: 10px;
-    padding: 10px 25px;
-    font-size: 16px;
+    border-radius: 12px;
+    padding: 12px 28px;
+    font-size: 17px;
+    font-weight: bold;
     border: none;
-}
-
-.stButton>button:hover {
-    background: linear-gradient(90deg, #66BB6A, #388E3C);
-    transform: scale(1.05);
     transition: 0.3s ease;
 }
 
+@keyframes buttonFlow {
+    0% {background-position: 0% 50%;}
+    50% {background-position: 100% 50%;}
+    100% {background-position: 0% 50%;}
+}
+
+.stButton>button:hover {
+    transform: scale(1.08);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+}
+
+/* Inputs */
 .stSelectbox div, .stNumberInput div {
     color: #000000 !important;
 }
@@ -124,11 +154,10 @@ with col2:
 # ------------------------------------------
 # 🔮 Prediction Logic
 # ------------------------------------------
-if st.button("🔮 Get Result"):
+if st.button("🔮 Get Forecast"):
 
     selected_date = pd.to_datetime(f"01-{selected_month}-{selected_year}")
 
-    # If date exists in historical data
     if selected_date in df.index:
         actual_value = df.loc[selected_date]["Number of Tractor Sold"]
 
@@ -141,7 +170,6 @@ if st.button("🔮 Get Result"):
         """, unsafe_allow_html=True)
 
     else:
-        # Forecast future value
         last_training_date = df.index[-1]
 
         months_diff = (selected_date.year - last_training_date.year) * 12 + \
@@ -165,4 +193,4 @@ if st.button("🔮 Get Result"):
 # Footer
 # ------------------------------------------
 st.markdown("<br><hr>", unsafe_allow_html=True)
-st.markdown("<center> Forecast Dashboard | 2014 – 2025</center>", unsafe_allow_html=True)
+st.markdown("<center>✨ Professional Forecast Dashboard | 2014 – 2025</center>", unsafe_allow_html=True)
