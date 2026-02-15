@@ -17,15 +17,15 @@ st.set_page_config(
 )
 
 # ------------------------------------------
-# 💎 3D Animated Glass UI Styling
+# 💎 Light Glass UI Styling
 # ------------------------------------------
 st.markdown("""
 <style>
 .stApp {
-    background: linear-gradient(-45deg, #1e3c72, #2a5298, #16222A, #3A6073);
+    background: linear-gradient(-45deg, #f9fbfd, #e3f2fd, #f1f8ff, #ffffff);
     background-size: 400% 400%;
-    animation: gradient 10s ease infinite;
-    color: white;
+    animation: gradient 12s ease infinite;
+    color: #1a1a1a;
 }
 
 @keyframes gradient {
@@ -34,14 +34,38 @@ st.markdown("""
     100% {background-position: 0% 50%;}
 }
 
+h1, h2, h3, h4, h5, h6, p, label {
+    color: #1a1a1a !important;
+}
+
 .glass-card {
-    background: rgba(255, 255, 255, 0.15);
-    backdrop-filter: blur(12px);
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(10px);
     border-radius: 20px;
     padding: 30px;
-    box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.08);
     text-align: center;
     margin-top: 20px;
+    border: 1px solid rgba(0,0,0,0.05);
+}
+
+.stButton>button {
+    background: linear-gradient(90deg, #4CAF50, #2E7D32);
+    color: white;
+    border-radius: 10px;
+    padding: 10px 25px;
+    font-size: 16px;
+    border: none;
+}
+
+.stButton>button:hover {
+    background: linear-gradient(90deg, #66BB6A, #388E3C);
+    transform: scale(1.05);
+    transition: 0.3s ease;
+}
+
+.stSelectbox div, .stNumberInput div {
+    color: #000000 !important;
 }
 </style>
 """, unsafe_allow_html=True)
@@ -141,4 +165,4 @@ if st.button("🔮 Get Result"):
 # Footer
 # ------------------------------------------
 st.markdown("<br><hr>", unsafe_allow_html=True)
-st.markdown("<center>✨ Professional Forecast Dashboard | 2014 – 2025</center>", unsafe_allow_html=True)
+st.markdown("<center> Forecast Dashboard | 2014 – 2025</center>", unsafe_allow_html=True)
