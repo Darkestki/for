@@ -1,0 +1,6 @@
+streamlit
+pandas
+plotly
+statsmodels
+
+print("Refined requirements.txt created.")
