@@ -192,5 +192,3 @@ if st.button("Get Forecast"):
 # ------------------------------------------
 # Footer
 # ------------------------------------------
-st.markdown("<br><hr>", unsafe_allow_html=True)
-st.markdown("<center> By Rushil Patel/center>", unsafe_allow_html=True)
