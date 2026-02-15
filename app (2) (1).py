@@ -132,7 +132,7 @@ st.markdown("---")
 # 📉 SECTION 1: Model Performance Metrics
 # ==========================================
 
-st.subheader("📉 Model Performance (Training Data)")
+st.subheader("Model Performance (Training Data)")
 
 y_true = df["Number of Tractor Sold"]
 
@@ -164,7 +164,7 @@ with col1:
 with col2:
     st.markdown(f"""
     <div class="card {'metric-good' if arima_rmse < exp_rmse else 'metric-bad'}">
-        <h3>📊 ARIMA Model</h3>
+        <h3>📊 SARIMAX Model</h3>
         <p><b>MAE:</b> {round(arima_mae,2)}</p>
         <p><b>RMSE:</b> {round(arima_rmse,2)}</p>
     </div>
@@ -224,7 +224,7 @@ if st.button("Compare Forecast"):
         with colY:
             st.markdown(f"""
             <div class="card">
-                <h3>📊 ARIMA Forecast</h3>
+                <h3>📊 SARIMAX Forecast</h3>
                 <h1>{round(arima_forecast)}</h1>
             </div>
             """, unsafe_allow_html=True)
