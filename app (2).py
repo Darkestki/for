@@ -1,42 +1,23 @@
 # ==========================================
-# 🚜 Tractor Sales Forecasting Dashboard
+# 🚜 Tractor Sales Month-Year Forecast App
 # ==========================================
 
 import streamlit as st
 import pandas as pd
 import pickle
-import plotly.graph_objects as go
 import os
 
 # ------------------------------------------
 # 🎨 Page Configuration
 # ------------------------------------------
 st.set_page_config(
-    page_title="🚜 Tractor Sales Forecast",
+    page_title="🚜 Tractor Forecast",
     page_icon="🚜",
     layout="centered"
 )
 
 # ------------------------------------------
-# 📂 Load Dataset (Using Your Exact File Name)
-# ------------------------------------------
-@st.cache_data
-def load_data():
-    base_dir = os.path.dirname(os.path.abspath(__file__))
-    file_path = os.path.join(base_dir, "Tractor-Sales - Tractor-Sales.csv")
-
-    if not os.path.exists(file_path):
-        st.error("❌ CSV file not found. Make sure 'Tractor-Sales - Tractor-Sales.csv' is in same folder.")
-        st.stop()
-
-    df = pd.read_csv(file_path)
-    df['Month-Year'] = pd.to_datetime(df['Month-Year'], format='%b-%y')
-    df = df.set_index('Month-Year')
-    return df
-
-
-# ------------------------------------------
-# 🤖 Load Trained Model
+# 🤖 Load Model
 # ------------------------------------------
 @st.cache_resource
 def load_model():
@@ -44,7 +25,7 @@ def load_model():
     model_path = os.path.join(base_dir, "exponential_smoothing_model.pkl")
 
     if not os.path.exists(model_path):
-        st.error("❌ Model file not found. Please upload 'exponential_smoothing_model.pkl'.")
+        st.error("❌ Model file not found.")
         st.stop()
 
     with open(model_path, "rb") as file:
@@ -52,82 +33,59 @@ def load_model():
 
     return model
 
-
-# Load Data & Model
-df = load_data()
 model = load_model()
 
 # ------------------------------------------
-# 🏷️ Title Section
+# 🏷️ Title
 # ------------------------------------------
-st.title("🚜 Tractor Sales Forecasting App")
-st.markdown("### 📊 Month-Year Wise Sales Prediction")
-st.write("Forecasting tractor sales using Exponential Smoothing model.")
-
-# ------------------------------------------
-# 🎛 Sidebar Forecast Control
-# ------------------------------------------
-st.sidebar.header("⚙ Forecast Settings")
-
-forecast_months = st.sidebar.slider(
-    "📅 Select number of months to forecast:",
-    min_value=1,
-    max_value=36,
-    value=12
-)
+st.title("🚜 Tractor Sales Forecast")
+st.markdown("### 📅 Predict Sales for Selected Month & Year")
 
 # ------------------------------------------
-# 🔮 Generate Forecast
+# 📅 Month-Year Selection
 # ------------------------------------------
-forecast = model.forecast(forecast_months)
-forecast.index = pd.to_datetime(forecast.index)
+months = [
+    "January","February","March","April","May","June",
+    "July","August","September","October","November","December"
+]
 
-forecast_df = forecast.to_frame(name="Forecasted Sales")
-forecast_df["Month-Year"] = forecast_df.index.strftime("%b-%Y")
-forecast_df = forecast_df.reset_index(drop=True)
+col1, col2 = st.columns(2)
 
-# ------------------------------------------
-# 📈 Visualization
-# ------------------------------------------
-fig = go.Figure()
+with col1:
+    selected_month = st.selectbox("Select Month", months)
 
-# Historical Data
-fig.add_trace(go.Scatter(
-    x=df.index,
-    y=df["Number of Tractor Sold"],
-    mode="lines",
-    name="📘 Historical Sales"
-))
-
-# Forecast Data
-fig.add_trace(go.Scatter(
-    x=forecast.index,
-    y=forecast,
-    mode="lines",
-    name="🔴 Forecasted Sales",
-    line=dict(dash="dot")
-))
-
-fig.update_layout(
-    title="🚜 Tractor Sales: Historical vs Forecast",
-    xaxis_title="Month-Year",
-    yaxis_title="Number of Tractors Sold",
-    hovermode="x unified"
-)
-
-st.plotly_chart(fig, use_container_width=True)
+with col2:
+    selected_year = st.number_input("Select Year", min_value=2020, max_value=2035, value=2025)
 
 # ------------------------------------------
-# 📋 Forecast Table
+# 🔮 Predict Button
 # ------------------------------------------
-st.subheader("📅 Forecast Details")
-st.dataframe(
-    forecast_df[["Month-Year", "Forecasted Sales"]].round(0),
-    use_container_width=True
-)
+if st.button("🔮 Predict Sales"):
+
+    # Convert selected date to pandas datetime
+    selected_date = pd.to_datetime(f"01-{selected_month}-{selected_year}")
+
+    # Calculate number of months from last training date
+    last_training_date = model.data.dates[-1]
+    months_diff = (selected_date.year - last_training_date.year) * 12 + \
+                  (selected_date.month - last_training_date.month)
+
+    if months_diff <= 0:
+        st.warning("⚠ Please select a future month-year.")
+    else:
+        forecast = model.forecast(months_diff)
+        predicted_value = forecast.iloc[-1]
+
+        st.success("✅ Forecast Generated Successfully!")
+
+        st.markdown("## 📊 Forecast Result")
+        st.metric(
+            label=f"🚜 Predicted Sales for {selected_month} {selected_year}",
+            value=f"{round(predicted_value)} Units"
+        )
 
 # ------------------------------------------
-# 📌 Footer
+# Footer
 # ------------------------------------------
 st.markdown("---")
-st.markdown("✅ Built with Streamlit | 📈 Time Series Forecasting")
+st.markdown("📈 Powered by Exponential Smoothing Model")
