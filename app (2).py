@@ -18,15 +18,15 @@ st.set_page_config(
 )
 
 # ------------------------------------------
-# 📂 Load Dataset (Cloud Safe)
+# 📂 Load Dataset (Using Your Exact File Name)
 # ------------------------------------------
 @st.cache_data
 def load_data():
     base_dir = os.path.dirname(os.path.abspath(__file__))
-    file_path = os.path.join(base_dir, "tractor_sales.csv")
+    file_path = os.path.join(base_dir, "Tractor-Sales - Tractor-Sales.csv")
 
     if not os.path.exists(file_path):
-        st.error("❌ CSV file not found. Please upload 'tractor_sales.csv' in same folder.")
+        st.error("❌ CSV file not found. Make sure 'Tractor-Sales - Tractor-Sales.csv' is in same folder.")
         st.stop()
 
     df = pd.read_csv(file_path)
@@ -62,7 +62,7 @@ model = load_model()
 # ------------------------------------------
 st.title("🚜 Tractor Sales Forecasting App")
 st.markdown("### 📊 Month-Year Wise Sales Prediction")
-st.write("This dashboard forecasts future tractor sales using an Exponential Smoothing model.")
+st.write("Forecasting tractor sales using Exponential Smoothing model.")
 
 # ------------------------------------------
 # 🎛 Sidebar Forecast Control
@@ -82,7 +82,6 @@ forecast_months = st.sidebar.slider(
 forecast = model.forecast(forecast_months)
 forecast.index = pd.to_datetime(forecast.index)
 
-# Create Forecast DataFrame
 forecast_df = forecast.to_frame(name="Forecasted Sales")
 forecast_df["Month-Year"] = forecast_df.index.strftime("%b-%Y")
 forecast_df = forecast_df.reset_index(drop=True)
@@ -121,7 +120,7 @@ st.plotly_chart(fig, use_container_width=True)
 # ------------------------------------------
 # 📋 Forecast Table
 # ------------------------------------------
-st.subheader("📅 Forecast Details (Month-Year Wise)")
+st.subheader("📅 Forecast Details")
 st.dataframe(
     forecast_df[["Month-Year", "Forecasted Sales"]].round(0),
     use_container_width=True
@@ -131,4 +130,4 @@ st.dataframe(
 # 📌 Footer
 # ------------------------------------------
 st.markdown("---")
-st.markdown("✅ Built with Streamlit | 📈 Time Series Forecasting | 🤖 Exponential Smoothing")
+st.markdown("✅ Built with Streamlit | 📈 Time Series Forecasting")
