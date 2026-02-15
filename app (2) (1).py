@@ -1,5 +1,5 @@
 # ==========================================
-# 🚜 Tractor Forecast Pro – Dynamic Version
+# 🚜 Tractor Forecast Pro – Compact Dynamic Version
 # ==========================================
 
 import streamlit as st
@@ -18,56 +18,76 @@ st.set_page_config(
 )
 
 # ------------------------------------------
-# 💎 Premium UI Styling
+# 💎 Compact Professional UI Styling
 # ------------------------------------------
 st.markdown("""
 <style>
+
 .stApp {
     background: linear-gradient(135deg,#f4f9ff,#eef7f1,#ffffff);
 }
 
+/* Title */
 .main-title {
     text-align:center;
-    font-size:42px;
+    font-size:36px;
     font-weight:700;
     color:#1f3c88;
 }
 
 .sub-title {
     text-align:center;
-    font-size:18px;
+    font-size:16px;
     color:#555;
-    margin-bottom:40px;
+    margin-bottom:30px;
 }
 
+/* Smaller Cards */
 .card {
     background:white;
-    padding:25px;
-    border-radius:18px;
-    box-shadow:0 8px 20px rgba(0,0,0,0.08);
+    padding:15px;
+    border-radius:12px;
+    box-shadow:0 4px 12px rgba(0,0,0,0.08);
     text-align:center;
     transition:0.3s ease;
+    margin-bottom:10px;
 }
 
-.card:hover {
-    transform:translateY(-5px);
+.card h3 {
+    font-size:18px;
+    margin-bottom:8px;
+}
+
+.card p {
+    font-size:14px;
+    margin:4px 0;
 }
 
 .metric-good {
-    border-left:6px solid #2ca02c;
+    border-left:5px solid #2ca02c;
 }
 
 .metric-bad {
-    border-left:6px solid #d62728;
+    border-left:5px solid #d62728;
 }
 
+.best-card {
+    background:#f8fff8;
+    padding:18px;
+    border-radius:12px;
+    text-align:center;
+    border:2px solid #2ca02c;
+    margin-top:15px;
+}
+
+/* Button */
 .stButton>button {
     background: linear-gradient(90deg,#1f77b4,#2ca02c);
     color:white;
-    border-radius:10px;
-    padding:12px 25px;
+    border-radius:8px;
+    padding:8px 18px;
     font-weight:bold;
-    font-size:16px;
+    font-size:14px;
 }
 
 </style>
@@ -132,14 +152,13 @@ st.markdown("---")
 # 📉 SECTION 1: Model Performance
 # ==========================================
 
-st.subheader("📉 Model Performance (Training Data)")
+st.subheader("📉 Model Performance")
 
 y_true = df["Number of Tractor Sold"]
 
 exp_pred = exp_model.fittedvalues
 arima_pred = arima_model.fittedvalues
 
-# Align lengths
 min_len_exp = min(len(y_true), len(exp_pred))
 min_len_arima = min(len(y_true), len(arima_pred))
 
@@ -149,7 +168,7 @@ y_arima = y_true[-min_len_arima:]
 exp_pred = exp_pred[-min_len_exp:]
 arima_pred = arima_pred[-min_len_arima:]
 
-# Calculate Metrics
+# Metrics
 exp_mae = calculate_mae(y_exp, exp_pred)
 exp_rmse = calculate_rmse(y_exp, exp_pred)
 exp_mape = calculate_mape(y_exp, exp_pred)
@@ -158,7 +177,7 @@ arima_mae = calculate_mae(y_arima, arima_pred)
 arima_rmse = calculate_rmse(y_arima, arima_pred)
 arima_mape = calculate_mape(y_arima, arima_pred)
 
-# 🔹 Dynamic Metric Selection
+# Dynamic Metric Selector
 metric_choice = st.selectbox(
     "Select Metric to Decide Best Model",
     ["RMSE", "MAE", "MAPE"]
@@ -176,27 +195,27 @@ col1, col2 = st.columns(2)
 with col1:
     st.markdown(f"""
     <div class="card {'metric-good' if better_model == 'Exponential Smoothing' else 'metric-bad'}">
-        <h3>📈 Exponential Smoothing</h3>
-        <p><b>MAE:</b> {round(exp_mae,2)}</p>
-        <p><b>RMSE:</b> {round(exp_rmse,2)}</p>
-        <p><b>MAPE:</b> {round(exp_mape,2)}%</p>
+        <h3>📈 Exponential</h3>
+        <p>MAE: {round(exp_mae,2)}</p>
+        <p>RMSE: {round(exp_rmse,2)}</p>
+        <p>MAPE: {round(exp_mape,2)}%</p>
     </div>
     """, unsafe_allow_html=True)
 
 with col2:
     st.markdown(f"""
     <div class="card {'metric-good' if better_model == 'SARIMAX' else 'metric-bad'}">
-        <h3>📊 SARIMAX Model</h3>
-        <p><b>MAE:</b> {round(arima_mae,2)}</p>
-        <p><b>RMSE:</b> {round(arima_rmse,2)}</p>
-        <p><b>MAPE:</b> {round(arima_mape,2)}%</p>
+        <h3>📊 SARIMAX</h3>
+        <p>MAE: {round(arima_mae,2)}</p>
+        <p>RMSE: {round(arima_rmse,2)}</p>
+        <p>MAPE: {round(arima_mape,2)}%</p>
     </div>
     """, unsafe_allow_html=True)
 
 st.markdown(f"""
-<div class="card" style="margin-top:25px;">
-    <h3>🏆 Best Performing Model (Based on {metric_choice})</h3>
-    <h2 style="color:#2ca02c;">{better_model}</h2>
+<div class="best-card">
+    <h4>🏆 Best Model (Based on {metric_choice})</h4>
+    <h2>{better_model}</h2>
 </div>
 """, unsafe_allow_html=True)
 
@@ -206,22 +225,20 @@ st.markdown("---")
 # 🔮 SECTION 2: Forecast Comparison
 # ==========================================
 
-st.subheader("🔮 Future Forecast Comparison")
-
-months = [
-    "January","February","March","April","May","June",
-    "July","August","September","October","November","December"
-]
+st.subheader("🔮 Future Forecast")
 
 colA, colB = st.columns(2)
 
 with colA:
-    selected_month = st.selectbox("Select Month", months)
+    selected_month = st.selectbox("Select Month",
+        ["January","February","March","April","May","June",
+         "July","August","September","October","November","December"]
+    )
 
 with colB:
-    selected_year = st.number_input("Select Year", min_value=2014, max_value=2030, value=2024)
+    selected_year = st.number_input("Select Year", 2014, 2030, 2024)
 
-if st.button("Compare Forecast"):
+if st.button("Generate Forecast"):
 
     selected_date = pd.to_datetime(f"01-{selected_month}-{selected_year}")
     last_date = df.index[-1]
@@ -239,18 +256,18 @@ if st.button("Compare Forecast"):
         with colX:
             st.markdown(f"""
             <div class="card">
-                <h3>📈 Exponential Forecast</h3>
-                <h1>{round(exp_forecast)}</h1>
+                <h3>📈 Exponential</h3>
+                <h2>{round(exp_forecast)}</h2>
             </div>
             """, unsafe_allow_html=True)
 
         with colY:
             st.markdown(f"""
             <div class="card">
-                <h3>📊 SARIMAX Forecast</h3>
-                <h1>{round(arima_forecast)}</h1>
+                <h3>📊 SARIMAX</h3>
+                <h2>{round(arima_forecast)}</h2>
             </div>
             """, unsafe_allow_html=True)
 
     else:
-        st.warning("⚠ Please select a future date for forecasting.")
+        st.warning("⚠ Please select a future date.")
