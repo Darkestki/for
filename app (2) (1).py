@@ -18,7 +18,7 @@ st.set_page_config(
 )
 
 # ------------------------------------------
-# 💎 Premium Dynamic UI Styling
+# 💎 Premium UI Styling
 # ------------------------------------------
 st.markdown("""
 <style>
@@ -68,12 +68,8 @@ st.markdown("""
     padding:12px 25px;
     font-weight:bold;
     font-size:16px;
-    transition:0.3s ease;
 }
 
-.stButton>button:hover {
-    transform:scale(1.05);
-}
 </style>
 """, unsafe_allow_html=True)
 
@@ -106,13 +102,17 @@ def load_models():
     return exp_model, arima_model
 
 # ------------------------------------------
-# 📊 Error Metric Functions (Manual)
+# 📊 Error Metrics
 # ------------------------------------------
 def calculate_mae(y_true, y_pred):
     return np.mean(np.abs(y_true - y_pred))
 
 def calculate_rmse(y_true, y_pred):
     return np.sqrt(np.mean((y_true - y_pred) ** 2))
+
+def calculate_mape(y_true, y_pred):
+    y_true, y_pred = np.array(y_true), np.array(y_pred)
+    return np.mean(np.abs((y_true - y_pred) / y_true)) * 100
 
 # ------------------------------------------
 # 🚀 Load Everything
@@ -121,7 +121,7 @@ df = load_data()
 exp_model, arima_model = load_models()
 
 # ------------------------------------------
-# 🏷️ Header Section
+# 🏷️ Header
 # ------------------------------------------
 st.markdown('<div class="main-title">🚜 Tractor Sales Forecast Pro</div>', unsafe_allow_html=True)
 st.markdown('<div class="sub-title">Dynamic Model Comparison: Exponential Smoothing vs SARIMAX</div>', unsafe_allow_html=True)
@@ -129,50 +129,73 @@ st.markdown('<div class="sub-title">Dynamic Model Comparison: Exponential Smooth
 st.markdown("---")
 
 # ==========================================
-# 📉 SECTION 1: Model Performance Metrics
+# 📉 SECTION 1: Model Performance
 # ==========================================
 
-st.subheader("Model Performance (Training Data)")
+st.subheader("📉 Model Performance (Training Data)")
 
 y_true = df["Number of Tractor Sold"]
 
 exp_pred = exp_model.fittedvalues
 arima_pred = arima_model.fittedvalues
 
+# Align lengths
 min_len_exp = min(len(y_true), len(exp_pred))
 min_len_arima = min(len(y_true), len(arima_pred))
 
-exp_mae = calculate_mae(y_true[-min_len_exp:], exp_pred[-min_len_exp:])
-exp_rmse = calculate_rmse(y_true[-min_len_exp:], exp_pred[-min_len_exp:])
+y_exp = y_true[-min_len_exp:]
+y_arima = y_true[-min_len_arima:]
 
-arima_mae = calculate_mae(y_true[-min_len_arima:], arima_pred[-min_len_arima:])
-arima_rmse = calculate_rmse(y_true[-min_len_arima:], arima_pred[-min_len_arima:])
+exp_pred = exp_pred[-min_len_exp:]
+arima_pred = arima_pred[-min_len_arima:]
 
-better_model = "Exponential Smoothing" if exp_rmse < arima_rmse else "ARIMA"
+# Calculate Metrics
+exp_mae = calculate_mae(y_exp, exp_pred)
+exp_rmse = calculate_rmse(y_exp, exp_pred)
+exp_mape = calculate_mape(y_exp, exp_pred)
+
+arima_mae = calculate_mae(y_arima, arima_pred)
+arima_rmse = calculate_rmse(y_arima, arima_pred)
+arima_mape = calculate_mape(y_arima, arima_pred)
+
+# 🔹 Dynamic Metric Selection
+metric_choice = st.selectbox(
+    "Select Metric to Decide Best Model",
+    ["RMSE", "MAE", "MAPE"]
+)
+
+if metric_choice == "RMSE":
+    better_model = "Exponential Smoothing" if exp_rmse < arima_rmse else "SARIMAX"
+elif metric_choice == "MAE":
+    better_model = "Exponential Smoothing" if exp_mae < arima_mae else "SARIMAX"
+else:
+    better_model = "Exponential Smoothing" if exp_mape < arima_mape else "SARIMAX"
 
 col1, col2 = st.columns(2)
 
 with col1:
     st.markdown(f"""
-    <div class="card {'metric-good' if exp_rmse < arima_rmse else 'metric-bad'}">
+    <div class="card {'metric-good' if better_model == 'Exponential Smoothing' else 'metric-bad'}">
         <h3>📈 Exponential Smoothing</h3>
         <p><b>MAE:</b> {round(exp_mae,2)}</p>
         <p><b>RMSE:</b> {round(exp_rmse,2)}</p>
+        <p><b>MAPE:</b> {round(exp_mape,2)}%</p>
     </div>
     """, unsafe_allow_html=True)
 
 with col2:
     st.markdown(f"""
-    <div class="card {'metric-good' if arima_rmse < exp_rmse else 'metric-bad'}">
+    <div class="card {'metric-good' if better_model == 'SARIMAX' else 'metric-bad'}">
         <h3>📊 SARIMAX Model</h3>
         <p><b>MAE:</b> {round(arima_mae,2)}</p>
         <p><b>RMSE:</b> {round(arima_rmse,2)}</p>
+        <p><b>MAPE:</b> {round(arima_mape,2)}%</p>
     </div>
     """, unsafe_allow_html=True)
 
 st.markdown(f"""
 <div class="card" style="margin-top:25px;">
-    <h3>🏆 Best Performing Model</h3>
+    <h3>🏆 Best Performing Model (Based on {metric_choice})</h3>
     <h2 style="color:#2ca02c;">{better_model}</h2>
 </div>
 """, unsafe_allow_html=True)
@@ -196,7 +219,7 @@ with colA:
     selected_month = st.selectbox("Select Month", months)
 
 with colB:
-    selected_year = st.number_input("Select Year", min_value=2014, max_value=2025, value=2024)
+    selected_year = st.number_input("Select Year", min_value=2014, max_value=2030, value=2024)
 
 if st.button("Compare Forecast"):
 
@@ -230,4 +253,4 @@ if st.button("Compare Forecast"):
             """, unsafe_allow_html=True)
 
     else:
-        st.warning("Please select a future date for forecasting.")
+        st.warning("⚠ Please select a future date for forecasting.")
