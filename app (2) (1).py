@@ -1,5 +1,5 @@
 # ==========================================
-# 🚜 Tractor Forecast Pro - Model Comparison
+# 🚜 Tractor Forecast Pro – Dynamic Version
 # ==========================================
 
 import streamlit as st
@@ -7,10 +7,9 @@ import pandas as pd
 import pickle
 import os
 import numpy as np
-from sklearn.metrics import mean_absolute_error, mean_squared_error
 
 # ------------------------------------------
-# 🎨 Page Config
+# 🎨 Page Configuration
 # ------------------------------------------
 st.set_page_config(
     page_title="Tractor Forecast Pro",
@@ -19,7 +18,7 @@ st.set_page_config(
 )
 
 # ------------------------------------------
-# 💎 Premium UI Styling
+# 💎 Premium Dynamic UI Styling
 # ------------------------------------------
 st.markdown("""
 <style>
@@ -27,18 +26,18 @@ st.markdown("""
     background: linear-gradient(135deg,#f4f9ff,#eef7f1,#ffffff);
 }
 
-.title {
+.main-title {
     text-align:center;
-    font-size:40px;
+    font-size:42px;
     font-weight:700;
     color:#1f3c88;
 }
 
-.subtitle {
+.sub-title {
     text-align:center;
     font-size:18px;
     color:#555;
-    margin-bottom:30px;
+    margin-bottom:40px;
 }
 
 .card {
@@ -47,14 +46,19 @@ st.markdown("""
     border-radius:18px;
     box-shadow:0 8px 20px rgba(0,0,0,0.08);
     text-align:center;
+    transition:0.3s ease;
 }
 
-.metric-card {
-    background:#f9fbfd;
-    padding:20px;
-    border-radius:15px;
-    box-shadow:0 6px 15px rgba(0,0,0,0.06);
-    text-align:center;
+.card:hover {
+    transform:translateY(-5px);
+}
+
+.metric-good {
+    border-left:6px solid #2ca02c;
+}
+
+.metric-bad {
+    border-left:6px solid #d62728;
 }
 
 .stButton>button {
@@ -64,6 +68,11 @@ st.markdown("""
     padding:12px 25px;
     font-weight:bold;
     font-size:16px;
+    transition:0.3s ease;
+}
+
+.stButton>button:hover {
+    transform:scale(1.05);
 }
 </style>
 """, unsafe_allow_html=True)
@@ -96,40 +105,56 @@ def load_models():
 
     return exp_model, arima_model
 
+# ------------------------------------------
+# 📊 Error Metric Functions (Manual)
+# ------------------------------------------
+def calculate_mae(y_true, y_pred):
+    return np.mean(np.abs(y_true - y_pred))
+
+def calculate_rmse(y_true, y_pred):
+    return np.sqrt(np.mean((y_true - y_pred) ** 2))
+
+# ------------------------------------------
+# 🚀 Load Everything
+# ------------------------------------------
 df = load_data()
 exp_model, arima_model = load_models()
 
 # ------------------------------------------
-# 🏷️ Header
+# 🏷️ Header Section
 # ------------------------------------------
-st.markdown('<div class="title">🚜 Tractor Sales Forecast Pro</div>', unsafe_allow_html=True)
-st.markdown('<div class="subtitle">Exponential Smoothing vs ARIMA Model Comparison</div>', unsafe_allow_html=True)
+st.markdown('<div class="main-title">🚜 Tractor Sales Forecast Pro</div>', unsafe_allow_html=True)
+st.markdown('<div class="sub-title">Dynamic Model Comparison: Exponential Smoothing vs ARIMA</div>', unsafe_allow_html=True)
 
-# ------------------------------------------
-# 📊 Calculate Error Metrics (Training Data)
-# ------------------------------------------
+st.markdown("---")
+
+# ==========================================
+# 📉 SECTION 1: Model Performance Metrics
+# ==========================================
+
+st.subheader("📉 Model Performance (Training Data)")
+
 y_true = df["Number of Tractor Sold"]
 
-# In-sample predictions
 exp_pred = exp_model.fittedvalues
 arima_pred = arima_model.fittedvalues
 
-exp_mae = mean_absolute_error(y_true[-len(exp_pred):], exp_pred)
-exp_rmse = np.sqrt(mean_squared_error(y_true[-len(exp_pred):], exp_pred))
+min_len_exp = min(len(y_true), len(exp_pred))
+min_len_arima = min(len(y_true), len(arima_pred))
 
-arima_mae = mean_absolute_error(y_true[-len(arima_pred):], arima_pred)
-arima_rmse = np.sqrt(mean_squared_error(y_true[-len(arima_pred):], arima_pred))
+exp_mae = calculate_mae(y_true[-min_len_exp:], exp_pred[-min_len_exp:])
+exp_rmse = calculate_rmse(y_true[-min_len_exp:], exp_pred[-min_len_exp:])
 
-# ------------------------------------------
-# 📈 Metrics Display
-# ------------------------------------------
-st.markdown("### 📉 Model Error Metrics")
+arima_mae = calculate_mae(y_true[-min_len_arima:], arima_pred[-min_len_arima:])
+arima_rmse = calculate_rmse(y_true[-min_len_arima:], arima_pred[-min_len_arima:])
+
+better_model = "Exponential Smoothing" if exp_rmse < arima_rmse else "ARIMA"
 
 col1, col2 = st.columns(2)
 
 with col1:
     st.markdown(f"""
-    <div class="metric-card">
+    <div class="card {'metric-good' if exp_rmse < arima_rmse else 'metric-bad'}">
         <h3>📈 Exponential Smoothing</h3>
         <p><b>MAE:</b> {round(exp_mae,2)}</p>
         <p><b>RMSE:</b> {round(exp_rmse,2)}</p>
@@ -138,18 +163,15 @@ with col1:
 
 with col2:
     st.markdown(f"""
-    <div class="metric-card">
+    <div class="card {'metric-good' if arima_rmse < exp_rmse else 'metric-bad'}">
         <h3>📊 ARIMA Model</h3>
         <p><b>MAE:</b> {round(arima_mae,2)}</p>
         <p><b>RMSE:</b> {round(arima_rmse,2)}</p>
     </div>
     """, unsafe_allow_html=True)
 
-# Highlight Better Model
-better_model = "Exponential Smoothing" if exp_rmse < arima_rmse else "ARIMA"
-
 st.markdown(f"""
-<div class="card" style="margin-top:20px;">
+<div class="card" style="margin-top:25px;">
     <h3>🏆 Best Performing Model</h3>
     <h2 style="color:#2ca02c;">{better_model}</h2>
 </div>
@@ -157,9 +179,12 @@ st.markdown(f"""
 
 st.markdown("---")
 
-# ------------------------------------------
-# 📅 User Forecast Section
-# ------------------------------------------
+# ==========================================
+# 🔮 SECTION 2: Forecast Comparison
+# ==========================================
+
+st.subheader("🔮 Future Forecast Comparison")
+
 months = [
     "January","February","March","April","May","June",
     "July","August","September","October","November","December"
@@ -171,13 +196,13 @@ with colA:
     selected_month = st.selectbox("Select Month", months)
 
 with colB:
-    selected_year = st.number_input("Select Year", min_value=2014, max_value=2025, value=2022)
+    selected_year = st.number_input("Select Year", min_value=2014, max_value=2025, value=2024)
 
-if st.button("🔮 Compare Forecast"):
+if st.button("Compare Forecast"):
 
     selected_date = pd.to_datetime(f"01-{selected_month}-{selected_year}")
-
     last_date = df.index[-1]
+
     months_diff = (selected_date.year - last_date.year) * 12 + \
                   (selected_date.month - last_date.month)
 
