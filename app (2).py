@@ -11,7 +11,7 @@ import os
 # 🎨 Page Configuration
 # ------------------------------------------
 st.set_page_config(
-    page_title="🚜 Tractor Forecast Pro",
+    page_title="Tractor Forecast Pro",
     page_icon="🚜",
     layout="centered"
 )
@@ -154,7 +154,7 @@ with col2:
 # ------------------------------------------
 # 🔮 Prediction Logic
 # ------------------------------------------
-if st.button("🔮 Get Forecast"):
+if st.button("Get Forecast"):
 
     selected_date = pd.to_datetime(f"01-{selected_month}-{selected_year}")
 
@@ -193,4 +193,4 @@ if st.button("🔮 Get Forecast"):
 # Footer
 # ------------------------------------------
 st.markdown("<br><hr>", unsafe_allow_html=True)
-st.markdown("<center>✨ Professional Forecast Dashboard | 2014 – 2025</center>", unsafe_allow_html=True)
+st.markdown("<center> By Rushil Patel/center>", unsafe_allow_html=True)
