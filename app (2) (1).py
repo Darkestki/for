@@ -124,7 +124,7 @@ exp_model, arima_model = load_models()
 # 🏷️ Header Section
 # ------------------------------------------
 st.markdown('<div class="main-title">🚜 Tractor Sales Forecast Pro</div>', unsafe_allow_html=True)
-st.markdown('<div class="sub-title">Dynamic Model Comparison: Exponential Smoothing vs ARIMA</div>', unsafe_allow_html=True)
+st.markdown('<div class="sub-title">Dynamic Model Comparison: Exponential Smoothing vs SARIMAX</div>', unsafe_allow_html=True)
 
 st.markdown("---")
 
